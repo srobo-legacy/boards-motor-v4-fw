@@ -3,4 +3,6 @@
 
 void usart_init(void);
 
+int usart_get_char(void);
+
 #endif /* __USART_H */

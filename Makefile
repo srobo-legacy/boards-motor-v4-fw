@@ -1,3 +1,5 @@
+FW_VER=1
+
 TOOLCHAIN_DIR = /opt/sat/arm-none-eabi
 PREFIX = arm-none-eabi
 CC = $(PREFIX)-gcc
@@ -12,13 +14,13 @@ OOCD_BOARD = oocd/mcv4.cfg
 
 CFLAGS += -mcpu=cortex-m3 -mthumb -msoft-float -DSTM32F1 \
 	  -Wall -Wextra -O0 -std=gnu99 -g -fno-common \
-	  -I$(TOOLCHAIN_DIR)/include
+	  -I$(TOOLCHAIN_DIR)/include -DFW_VER=$(FW_VER)
 LDFLAGS += -lc -lm -L$(TOOLCHAIN_DIR)/lib/thumb/cortex-m3 -L$(TOOLCHAIN_DIR)/lib \
 	   -L$(TOOLCHAIN_DIR)/lib/stm32/f1 -lnosys -T$(LDSCRIPT) \
 	   -nostartfiles -Wl,--gc-sections,-Map=mcv4.map -mcpu=cortex-m3 \
 	   -mthumb -march=armv7-m -mfix-cortex-m3-ldrd -msoft-float
 
-O_FILES = main.o led.o output.o usart.o analogue.o
+O_FILES = main.o led.o output.o usart.o analogue.o fw_ver.o
 TEST_O_FILES = test.o led.o output.o
 
 all: mcv4.elf mcv4_test.elf

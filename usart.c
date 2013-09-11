@@ -23,6 +23,10 @@ void usart_init() {
 	usart_enable(USART1);
 }
 
+int usart_get_char(void) {
+	return usart_recv_blocking(USART1);
+}
+
 int _write(int file, char *ptr, int len) {
 	int i;
 
