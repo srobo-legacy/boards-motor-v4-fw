@@ -22,18 +22,82 @@ void init(void) {
 	//analogue_init();
 }
 
-int main(void) {
-	int i;
+void print_version(void) {
+	printf("MCV4B:%i\n", firmware_version);
+}
 
+void set_output(int channel, int8_t i) {
+	if (i == -127) {
+		output_disable(channel);
+	} else if (i == -126) {
+		output_enable(channel);
+		output_direction(channel, DIR_HALT);
+	} else {
+		output_enable(channel);
+		if (i < 0) {
+			output_direction(channel, DIR_REV);
+		} else {
+			output_direction(channel, DIR_FWD);
+		}
+		output_speed(channel, abs(i));
+	}
+}
+
+typedef enum {
+	STATE_INIT,
+	STATE_SPEED0,
+	STATE_SPEED1
+} state_t;
+
+void fsm(int c) {
+	int8_t i = c - 128;
+
+	static state_t state = STATE_INIT;
+	switch (state) {
+		case STATE_INIT:
+			switch (i) {
+				case -128:
+					state = STATE_INIT;
+					break;
+				case -127:
+					state = STATE_INIT;
+					print_version();
+					break;
+				case -126:
+					state = STATE_SPEED0;
+					break;
+				case -125:
+					state = STATE_SPEED1;
+					break;
+				default:
+					state = STATE_INIT;
+					break;
+			}
+			break;
+		case STATE_SPEED0:
+			state = STATE_INIT;
+			if (i != -128) {
+				set_output(0, i);
+			}
+			break;
+		case STATE_SPEED1:
+			state = STATE_INIT;
+			if (i != -128) {
+				set_output(1, i);
+			}
+			break;
+		default:
+			state = STATE_INIT;
+			break;
+	}
+}
+
+int main(void) {
 	init();
 
 	while (1) {
 		int c = usart_get_char();
-		switch (c) {
-			case 'V':
-				printf("MCV4B:%i\n", firmware_version);
-				break;
-		};
+		fsm(c);
 	}
 
 	return 0;
