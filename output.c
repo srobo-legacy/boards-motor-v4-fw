@@ -8,16 +8,16 @@
 #define PWM_PORT GPIOA
 #define CTRL_PORT GPIOB
 
-#define M0INa GPIO8
-#define M0INb GPIO9
-#define M0ENa GPIO10
-#define M0ENb GPIO11
-#define M1INa GPIO12
-#define M1INb GPIO13
-#define M1ENa GPIO14
-#define M1ENb GPIO15
-#define M0PWM GPIO_TIM2_CH1_ETR
-#define M1PWM GPIO_TIM2_CH2
+#define M0INa GPIO12
+#define M0INb GPIO13
+#define M0ENa GPIO14
+#define M0ENb GPIO15
+#define M1INa GPIO8
+#define M1INb GPIO9
+#define M1ENa GPIO10
+#define M1ENb GPIO11
+#define M0PWM GPIO_TIM2_CH2
+#define M1PWM GPIO_TIM2_CH1_ETR
 
 #define setup_ctrl_gpio(pin) \
 	gpio_set_mode(CTRL_PORT, GPIO_MODE_OUTPUT_2_MHZ, \
