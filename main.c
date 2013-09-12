@@ -3,12 +3,16 @@
 
 #include <libopencm3/stm32/f1/rcc.h>
 #include <libopencm3/stm32/f1/gpio.h>
+#include <libopencm3/cm3/scb.h>
 
 #include "led.h"
 #include "output.h"
 #include "usart.h"
 #include "analogue.h"
 #include "fw_ver.h"
+
+uint32_t *top_of_ram = ((uint32_t *)0x20001FF0);
+#define BOOTLOADER_MAGIC 0xDEADBEEF
 
 void init(void) {
 	rcc_clock_setup_in_hse_8mhz_out_24mhz();
@@ -20,10 +24,18 @@ void init(void) {
 	output_init();
 	usart_init();
 	//analogue_init();
+
+	led_set(LED_M0_R);
 }
 
 void print_version(void) {
 	printf("MCV4B:%i\n", firmware_version);
+}
+
+void enter_bootloader(void) {
+	printf("Entering bootloader\n");
+	*top_of_ram = BOOTLOADER_MAGIC;
+	scb_reset_system();
 }
 
 void set_output(int channel, int8_t i) {
@@ -69,6 +81,9 @@ void fsm(int c) {
 				case -125:
 					state = STATE_SPEED1;
 					break;
+				case -124:
+					enter_bootloader();
+					break;
 				default:
 					state = STATE_INIT;
 					break;
@@ -92,7 +107,16 @@ void fsm(int c) {
 	}
 }
 
+
 int main(void) {
+	/* Check to see if we should jump into the bootloader */
+	if (*top_of_ram == BOOTLOADER_MAGIC) {
+		asm("ldr r0, =0x1FFFF000\n\t" \
+		    "ldr sp,[r0, #0]\n\t" \
+		    "ldr r0,[r0, #4]\n\t" \
+		    "bx r0");
+	}
+
 	init();
 
 	while (1) {
