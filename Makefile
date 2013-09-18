@@ -23,7 +23,7 @@ LDFLAGS += -lc -lm -L$(TOOLCHAIN_DIR)/lib/thumb/cortex-m3 -L$(TOOLCHAIN_DIR)/lib
 O_FILES = main.o led.o output.o usart.o analogue.o fw_ver.o
 TEST_O_FILES = test.o led.o output.o
 
-all: mcv4.elf mcv4_test.elf
+all: mcv4.bin mcv4_test.bin
 
 test: mcv4_test.bin
 
