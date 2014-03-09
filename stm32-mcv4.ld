@@ -1,6 +1,9 @@
 /*
- * This file is part of the libopencm3 project.
+ * This file is based on linker scripts from the libopencm3 project.
  *
+ * Copyright (C) 2014 Rob Spanton <rob@robspanton.com>
+ * Copyright (C) 2013 Richard Barlow <richard@richardbarlow.co.uk>
+ * Copyright (C) 2012 Karl Palsson <karlp@tweak.net.au>
  * Copyright (C) 2009 Uwe Hermann <uwe@hermann-uwe.de>
  *
  * This library is free software: you can redistribute it and/or modify
@@ -16,6 +19,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/* Linker script for STM32F100x8, 64K flash, 8K RAM. */
 
 /* Define memory regions. */
 MEMORY
@@ -43,6 +48,29 @@ SECTIONS
 		. = ALIGN(4);
 	} >rom
 
+	/* C++ Static constructors/destructors, also used for __attribute__
+	 * ((constructor)) and the likes */
+	.preinit_array : {
+		. = ALIGN(4);
+		__preinit_array_start = .;
+		KEEP (*(.preinit_array))
+		__preinit_array_end = .;
+	} >rom
+	.init_array : {
+		. = ALIGN(4);
+		__init_array_start = .;
+		KEEP (*(SORT(.init_array.*)))
+		KEEP (*(.init_array))
+		__init_array_end = .;
+	} >rom
+	.fini_array : {
+		. = ALIGN(4);
+		__fini_array_start = .;
+		KEEP (*(.fini_array))
+		KEEP (*(SORT(.fini_array.*)))
+		__fini_array_end = .;
+	} >rom
+
 	/*
 	 * Another section used by C++ stuff, appears when using newlib with
 	 * 64bit (long long) printf support
@@ -57,7 +85,7 @@ SECTIONS
 	} >rom
 
 	. = ALIGN(4);
-	_etext = ALIGN(8);
+	_etext = .;
 
 	.data : {
 		_data = .;
@@ -85,4 +113,5 @@ SECTIONS
 }
 
 PROVIDE(_stack = ORIGIN(ram) + LENGTH(ram));
+
 
