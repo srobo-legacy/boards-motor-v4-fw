@@ -133,9 +133,9 @@ int output_speed(int channel, int speed) {
 	check_channel(channel);
 	check_speed(speed);
 	if (channel == 0) {
-		timer_set_oc_value(TIM2, TIM_OC1, speed*20);
-	} else {
 		timer_set_oc_value(TIM2, TIM_OC2, speed*20);
+	} else {
+		timer_set_oc_value(TIM2, TIM_OC1, speed*20);
 	}
 	return 0;
 }
