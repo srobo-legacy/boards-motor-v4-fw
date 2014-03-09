@@ -67,6 +67,5 @@ void analogue_init(void) {
 
 void adc1_2_isr(void) {
 	led_toggle(LED_M0_R);
-	printf("%d,%d,%d,%d\n", ADC1_JDR1, ADC1_JDR2, ADC1_JDR3, ADC1_JDR4);
 	ADC1_SR = 0;
 }
