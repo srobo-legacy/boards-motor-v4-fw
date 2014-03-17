@@ -12,7 +12,7 @@
 #include "fw_ver.h"
 
 uint32_t *top_of_ram = ((uint32_t *)0x20001FF0);
-#define BOOTLOADER_MAGIC 0xDEADBEEF
+#define BOOTLOADER_MAGIC 0xFACEBEE5
 
 void init(void) {
 	rcc_clock_setup_in_hse_8mhz_out_24mhz();
@@ -111,6 +111,7 @@ void fsm(int c) {
 int main(void) {
 	/* Check to see if we should jump into the bootloader */
 	if (*top_of_ram == BOOTLOADER_MAGIC) {
+		*top_of_ram = 0;
 		asm("ldr r0, =0x1FFFF000\n\t" \
 		    "ldr sp,[r0, #0]\n\t" \
 		    "ldr r0,[r0, #4]\n\t" \

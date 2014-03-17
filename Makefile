@@ -1,4 +1,4 @@
-FW_VER=2
+FW_VER=3
 
 TOOLCHAIN_DIR = ./libopencm3
 PREFIX = arm-none-eabi
