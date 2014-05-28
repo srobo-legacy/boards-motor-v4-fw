@@ -38,51 +38,63 @@ void enter_bootloader(void) {
 	scb_reset_system();
 }
 
-void set_output(int channel, int8_t i) {
-	if (i == -127) {
-		output_disable(channel);
-	} else if (i == -126) {
-		output_enable(channel);
-		output_direction(channel, DIR_HALT);
-	} else {
-		output_enable(channel);
-		if (i < 0) {
-			output_direction(channel, DIR_REV);
-		} else {
+void set_output_mode(int channel, int8_t mode) {
+	switch (mode) {
+		case 'f':
+			output_enable(channel);
 			output_direction(channel, DIR_FWD);
-		}
-		output_speed(channel, abs(i));
+			break;
+		case 'r':
+			output_enable(channel);
+			output_direction(channel, DIR_REV);
+			break;
+		case 'h':
+			output_enable(channel);
+			output_direction(channel, DIR_HALT);
+			break;
+		case 'd':
+			output_disable(channel);
+			break;
+		default:
+			break;
 	}
 }
 
 typedef enum {
 	STATE_INIT,
 	STATE_SPEED0,
-	STATE_SPEED1
+	STATE_SPEED1,
+	STATE_MODE0,
+	STATE_MODE1
 } state_t;
 
 void fsm(int c) {
-	int8_t i = c - 128;
-
 	static state_t state = STATE_INIT;
+	if (c == 0) {
+		state = STATE_INIT;
+		return;
+	}
 	switch (state) {
 		case STATE_INIT:
-			switch (i) {
-				case -128:
-					state = STATE_INIT;
-					break;
-				case -127:
+			switch (c) {
+				case 1:
 					state = STATE_INIT;
 					print_version();
 					break;
-				case -126:
+				case 4:
+					enter_bootloader();
+					break;
+				case 's':
 					state = STATE_SPEED0;
 					break;
-				case -125:
+				case 'S':
 					state = STATE_SPEED1;
 					break;
-				case -124:
-					enter_bootloader();
+				case 'm':
+					state = STATE_MODE0;
+					break;
+				case 'M':
+					state = STATE_MODE1;
 					break;
 				default:
 					state = STATE_INIT;
@@ -91,15 +103,19 @@ void fsm(int c) {
 			break;
 		case STATE_SPEED0:
 			state = STATE_INIT;
-			if (i != -128) {
-				set_output(0, i);
-			}
+			output_speed(0, c);
 			break;
 		case STATE_SPEED1:
 			state = STATE_INIT;
-			if (i != -128) {
-				set_output(1, i);
-			}
+			output_speed(1, c);
+			break;
+		case STATE_MODE0:
+			state = STATE_INIT;
+			set_output_mode(0, c);
+			break;
+		case STATE_MODE1:
+			state = STATE_INIT;
+			set_output_mode(1, c);
 			break;
 		default:
 			state = STATE_INIT;
